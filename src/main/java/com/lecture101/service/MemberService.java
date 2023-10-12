@@ -29,7 +29,7 @@ import java.util.Optional;
 public class MemberService implements UserDetailsService {
 
     private final MemberRepository memberRepository;
-
+    private final PasswordEncoder passwordEncoder; // PasswordEncoder를 주입
 
 
 
@@ -47,11 +47,11 @@ public class MemberService implements UserDetailsService {
     }
 
 
-    public boolean checkPassword(Long member_id, String checkPassword) {
-        Member member = memberRepository.findById(member_id).orElseThrow(() ->
+    public boolean checkPassword(Long id, String checkPassword) {
+        Member member = memberRepository.findById(id).orElseThrow(() ->
                 new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
         String realPassword = member.getPassword();
-        boolean matches = encoder.matches(checkPassword, realPassword);
+        boolean matches = passwordEncoder.matches(checkPassword, realPassword);
         return matches;
     }
 
@@ -99,15 +99,15 @@ public class MemberService implements UserDetailsService {
     }
 
 
-    public Member findById(String memberId) {
-        Optional<Member> memberOptional = memberRepository.findById(memberId);
-        if (memberOptional.isPresent()) {
-            return memberOptional.get();
-        } else {
-            // 원하는 처리를 수행하거나 예외를 던질 수 있습니다.
-            throw new EntityNotFoundException("멤버 아이디를 찾을 수 없습니다: " + memberId);
-        }
-    }
+//    public Member findById(Long memberId) {
+//        Optional<Member> memberOptional = memberRepository.findById(memberId);
+//        if (memberOptional.isPresent()) {
+//            return memberOptional.get();
+//        } else {
+//            // 원하는 처리를 수행하거나 예외를 던질 수 있습니다.
+//            throw new EntityNotFoundException("멤버 아이디를 찾을 수 없습니다: " + memberId);
+//        }
+//    }
 
 
 

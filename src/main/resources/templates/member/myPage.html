@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:sec="http://www.w3.org/1999/xhtml"
+      layout:decorate="~{layouts/layout1}">
+
+<!-- 사용자 CSS 추가 -->
+<th:block layout:fragment="css">
+    <style>
+        .error {
+            color: #bd2130;
+        }
+    </style>
+</th:block>
+
+<div layout:fragment="content">
+<!--    th:action="@{'/members/admin/' + ${members.number}}"-->
+    <form role="form" method="get" th:action="@{'/members/mypage/' + ${memberFormDto.getId()}}"
+          th:object="${memberFormDto}">
+        <h1 class="text-decoration-none" sec:authorize="isAuthenticated()">
+            <span sec:authentication="name"></span>님의 마이페이지.
+        </h1>
+        <button type="button" class="btn btn-primary" onClick="location.href='/cart'">클래스 신청</button>
+        <button type="button" class="btn btn-primary" onClick="location.href='/orders'">수강 내역</button>
+        <button type="button" class="btn btn-primary" th:href="'/members/admin/'+${memberFormDto.getId()}">회원정보수정</button>
+    </form>
+
+</div>
+
+</html>
