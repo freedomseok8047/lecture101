@@ -21,7 +21,8 @@
         </h1>
         <button type="button" class="btn btn-primary" onClick="location.href='/cart'">클래스 신청</button>
         <button type="button" class="btn btn-primary" onClick="location.href='/orders'">수강 내역</button>
-        <button type="button" class="btn btn-primary" th:href="@{/members/updatemember/{memberId}(memberId=${member.id})}">회원정보수정</button>
+        <a class="btn btn-primary" th:href="@{/members/updatemember/{memberId}(memberId=${member.id})}">회원정보수정</a>
+
     </form>
     </th:block>
 </div>

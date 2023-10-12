@@ -98,11 +98,57 @@ public class MemberController {
         return "member/memberUpdate";
     }
 
-    // 맴버 수정 로직 처리
-    @PostMapping(value = "/checkPwd/{memberId}")
+    // 회원 정보 수정 처리
+    @PostMapping("/update")
+    public String updateMember(@ModelAttribute Member member,
+                               String currentPassword,
+                               String newpassword,
+                               String confirmPassword,
+                               Model model) {
+
+        Member existingMember = memberService.findById(member.getId());
+
+        // 현재 비밀번호 확인 로직
+        //타이핑한 currentPassword 와 db에 있는 기존 existingMember.getPassword()
+        // .matches 메서드를 이용해서 비교
+        if (!passwordEncoder.matches(currentPassword, existingMember.getPassword())) {
+            model.addAttribute("errorMessage", "현재 비밀번호가 일치하지 않습니다.");
+            model.addAttribute("member", member); // 원래의 멤버 정보를 다시 모델에 추가
+            return "member/memberUpdate";
+        }
+
+        // 새 비밀번호와 비밀번호 확인 일치 여부 확인 로직
+        if (newpassword != null && !newpassword.isEmpty()) {
+            if (!newpassword.equals(confirmPassword)) {
+                model.addAttribute("errorMessage", "새 비밀번호가 일치하지 않습니다.");
+                model.addAttribute("member", member); // 원래의 멤버 정보를 다시 모델에 추가
+                return "member/memberUpdate";
+            }
+            String encodedPassword = passwordEncoder.encode(newpassword);
+            member.setPassword(encodedPassword);
+        }
+
+        try {
+            memberService.updateMember(member);
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("errorMessage", e.getMessage());
+            model.addAttribute("member", member); // 원래의 멤버 정보를 다시 모델에 추가
+            return "member/memberUpdate";
+        }
+
+        return "redirect:/";
+    }
+
+    //회원탈퇴
+//    @GetMapping("/delete/{id}")
+//    public String deleteMember(@PathVariable Long id) {
+//        memberService.deleteMember(id);
+//        return "redirect:/members/manage";
+//    }
 
 
-    // 회원 상세 페이지 폼 (수정 폼)
+
+    // 회원 상세 페이지 폼
     @GetMapping(value = "/admin/{memberId}")
     public String memberDtl(@PathVariable("memberId") Long memberId, Model model){
 
@@ -122,20 +168,20 @@ public class MemberController {
     }
 
     // 회원 상세 페이지에서 수정 처리부분
-    @PostMapping(value = "/admin/{memberId}")
-    public String memberUpdate(@Valid MemberFormDto memberFormDto, BindingResult bindingResult){
-// 일반 데이터 기본 유효성 체크.
-        if(bindingResult.hasErrors()){
-            return "member/memberForm";
-        }
-        try {
-            // 일반, 파일 데이터를 전달함.
-            memberService.updateMember(memberFormDto);
-        } catch (Exception e){
-            return "imember/memberForm";
-        }
-
-        return "redirect:/";
-    }
+//    @PostMapping(value = "/admin/{memberId}")
+//    public String memberUpdate(@Valid MemberFormDto memberFormDto, BindingResult bindingResult){
+//// 일반 데이터 기본 유효성 체크.
+//        if(bindingResult.hasErrors()){
+//            return "member/memberForm";
+//        }
+//        try {
+//            // 일반, 파일 데이터를 전달함.
+//            memberService.updateMember(memberFormDto);
+//        } catch (Exception e){
+//            return "imember/memberForm";
+//        }
+//
+//        return "redirect:/";
+//    }
 
 }

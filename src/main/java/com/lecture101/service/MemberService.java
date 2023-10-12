@@ -46,14 +46,6 @@ public class MemberService implements UserDetailsService {
     }
 
 
-    public boolean checkPassword(Long id, String checkPassword) {
-        Member member = memberRepository.findById(id).orElseThrow(() ->
-                new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
-        String realPassword = member.getPassword();
-        boolean matches = passwordEncoder.matches(checkPassword, realPassword);
-        return matches;
-    }
-
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 
@@ -83,18 +75,28 @@ public class MemberService implements UserDetailsService {
         MemberFormDto memberFormDto = MemberFormDto.of(member);
         return memberFormDto;
     }
-    //회원정보 수정 처리 로직
-    public Long updateMember(MemberFormDto memberFormDto) throws Exception{
-        //회원정보 수정,
-        // 기존 회원 정보를 불러오기.
-        Member member = memberRepository.findById(memberFormDto.getId())
-                .orElseThrow(EntityNotFoundException::new);
-        // 기존 아이템에 내용에 , 더티 체킹. 변경사항에 대해서, 영속성이 알아서 자동으로 처리.
-        member.updateMember(memberFormDto);
-        memberRepository.save(member);
+    //회원 정보 수정 처리 로직
+    public void updateMember(Member member) {
+        Member existingMember = memberRepository.findById(member.getId())
+                .orElseThrow(() -> new IllegalArgumentException("해당 회원을 찾을 수 없습니다."));
 
+        // 이메일이 변경되었는지 확인하고, 변경되었다면 중복 체크를 수행합니다.
+        // 이메일 readOnly = true 라서 필요없는 부분
+//        if(!existingMember.getEmail().equals(member.getEmail())) {
+//            validateDuplicateMember(member);
+//        }
 
-        return member.getId();
+        existingMember.setName(member.getName());
+        existingMember.setEmail(member.getEmail());
+        existingMember.setAddress(member.getAddress());
+
+        // 비밀번호가 널이 아니고 비어 있지 않다면 업데이트합니다.
+        if (member.getPassword() != null && !member.getPassword().isEmpty()) {
+            existingMember.setPassword(member.getPassword());
+        }
+
+        // 저장하지 않아도, JPA가 트랜잭션 종료 시점에 변경 감지 (Dirty Checking)를 하여 업데이트 쿼리를 실행합니다.
+        // 만약 다른 로직이 추가로 필요하다면 memberRepository.save(existingMember);를 호출하세요.
     }
     //이메일로 맴버 정보불러오기
     public Member findByEmail(String email) {
