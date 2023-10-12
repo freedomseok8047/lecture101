@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -81,26 +83,19 @@ public class MemberController {
     }
     //마이페이지 띄우기
     @GetMapping(value = {"/mypage"})
-    public String showMyPage(@PathVariable("memberId") Long memberId,Model model) {
-        MemberFormDto memberFormDto = memberService.getMemberDtl(memberId);
-        model.addAttribute("memberFormDto", memberFormDto);
+    public String showMyPage(Model model, @AuthenticationPrincipal User user) {
+        if (user != null) {
+            Member member = memberService.findByEmail(user.getUsername());
+            model.addAttribute("member", member);
+        }
         return "member/myPage";
     }
     // 맴버 수정폼을 띄우기
-    @GetMapping(value = "/admin/{memberId}")
-    public String checkPassword(@PathVariable("memberId") Long memberId, Model model) {
-        try {
-            // 예) 맴버id로, 실제 디비에서 조회 후, 내용을 dto 담기.
-            MemberFormDto memberFormDto = memberService.getMemberDtl(memberId);
-            // dto 담은 내용을 모델 인스턴스에 담아서, 뷰로 전달.
-            model.addAttribute("memberFormDto", memberFormDto);
-        } catch(EntityNotFoundException e){
-            // 유효성, 체크.
-            model.addAttribute("errorMessage", "존재하지 않는 회원입니다.");
-            model.addAttribute("memberFormDto", new MemberFormDto());
-            return "member/memberForm";
-        }
-        return "member/memberForm";
+    @GetMapping(value = "/updatemember/{memberId}")
+    public String showUpdateMemberForm(@PathVariable Long memberId, Model model) {
+        Member member = memberService.findById(memberId);
+        model.addAttribute("member", member);
+        return "member/memberUpdate";
     }
 
     // 맴버 수정 로직 처리

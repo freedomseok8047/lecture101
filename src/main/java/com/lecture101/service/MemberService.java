@@ -33,7 +33,6 @@ public class MemberService implements UserDetailsService {
 
 
 
-
     public Member saveMember(Member member){
         validateDuplicateMember(member);
         return memberRepository.save(member);
@@ -97,17 +96,16 @@ public class MemberService implements UserDetailsService {
 
         return member.getId();
     }
+    //이메일로 맴버 정보불러오기
+    public Member findByEmail(String email) {
+        return memberRepository.findByEmail(email);
+    }
+    //id로 맴버 정보 불러오기
+    public Member findById(Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElse(null); // 회원이 없을 경우 null을 반환하거나 예외 처리를 수행하세요.
+    }
 
-
-//    public Member findById(Long memberId) {
-//        Optional<Member> memberOptional = memberRepository.findById(memberId);
-//        if (memberOptional.isPresent()) {
-//            return memberOptional.get();
-//        } else {
-//            // 원하는 처리를 수행하거나 예외를 던질 수 있습니다.
-//            throw new EntityNotFoundException("멤버 아이디를 찾을 수 없습니다: " + memberId);
-//        }
-//    }
 
 
 

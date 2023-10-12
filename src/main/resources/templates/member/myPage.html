@@ -14,16 +14,16 @@
 
 <div layout:fragment="content">
 <!--    th:action="@{'/members/admin/' + ${members.number}}"-->
-    <form role="form" method="get" th:action="@{'/members/mypage/' + ${memberFormDto.getId()}}"
-          th:object="${memberFormDto}">
+    <th:block th:if="${member != null}">
+    <form role="form">
         <h1 class="text-decoration-none" sec:authorize="isAuthenticated()">
             <span sec:authentication="name"></span>님의 마이페이지.
         </h1>
         <button type="button" class="btn btn-primary" onClick="location.href='/cart'">클래스 신청</button>
         <button type="button" class="btn btn-primary" onClick="location.href='/orders'">수강 내역</button>
-        <button type="button" class="btn btn-primary" th:href="'/members/admin/'+${memberFormDto.getId()}">회원정보수정</button>
+        <button type="button" class="btn btn-primary" th:href="@{/members/updatemember/{memberId}(memberId=${member.id})}">회원정보수정</button>
     </form>
-
+    </th:block>
 </div>
 
 </html>
