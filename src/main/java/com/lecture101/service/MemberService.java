@@ -29,7 +29,6 @@ import java.util.Optional;
 public class MemberService implements UserDetailsService {
 
     private final MemberRepository memberRepository;
-    private final PasswordEncoder passwordEncoder; // PasswordEncoder를 주입
 
 
 
@@ -98,6 +97,16 @@ public class MemberService implements UserDetailsService {
         // 저장하지 않아도, JPA가 트랜잭션 종료 시점에 변경 감지 (Dirty Checking)를 하여 업데이트 쿼리를 실행합니다.
         // 만약 다른 로직이 추가로 필요하다면 memberRepository.save(existingMember);를 호출하세요.
     }
+
+
+    // 회원탈퇴(삭제) 로직
+    public void deleteMember(Long memberId) {
+        Member memberToDelete = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 회원을 찾을 수 없습니다."));
+        memberRepository.delete(memberToDelete);
+    }
+
+
     //이메일로 맴버 정보불러오기
     public Member findByEmail(String email) {
         return memberRepository.findByEmail(email);

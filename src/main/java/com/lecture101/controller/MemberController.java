@@ -8,16 +8,23 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.EntityNotFoundException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 @RequestMapping("/members")
@@ -91,7 +98,7 @@ public class MemberController {
         return "member/myPage";
     }
     // 맴버 수정폼을 띄우기
-    @GetMapping(value = "/updatemember/{memberId}")
+    @GetMapping(value = "/updateMemberForm/{memberId}")
     public String showUpdateMemberForm(@PathVariable Long memberId, Model model) {
         Member member = memberService.findById(memberId);
         model.addAttribute("member", member);
@@ -102,7 +109,7 @@ public class MemberController {
     @PostMapping("/update")
     public String updateMember(@ModelAttribute Member member,
                                String currentPassword,
-                               String newpassword,
+                               String newPassword,
                                String confirmPassword,
                                Model model) {
 
@@ -118,13 +125,13 @@ public class MemberController {
         }
 
         // 새 비밀번호와 비밀번호 확인 일치 여부 확인 로직
-        if (newpassword != null && !newpassword.isEmpty()) {
-            if (!newpassword.equals(confirmPassword)) {
+        if (newPassword != null && !newPassword.isEmpty()) {
+            if (!newPassword.equals(confirmPassword)) {
                 model.addAttribute("errorMessage", "새 비밀번호가 일치하지 않습니다.");
                 model.addAttribute("member", member); // 원래의 멤버 정보를 다시 모델에 추가
                 return "member/memberUpdate";
             }
-            String encodedPassword = passwordEncoder.encode(newpassword);
+            String encodedPassword = passwordEncoder.encode(newPassword);
             member.setPassword(encodedPassword);
         }
 
@@ -139,12 +146,20 @@ public class MemberController {
         return "redirect:/";
     }
 
-    //회원탈퇴
-//    @GetMapping("/delete/{id}")
-//    public String deleteMember(@PathVariable Long id) {
-//        memberService.deleteMember(id);
-//        return "redirect:/members/manage";
-//    }
+    // 회원탈퇴
+    @GetMapping("/deleteMember/{memberId}")
+    public String deleteMember(@PathVariable Long memberId, HttpServletRequest request, HttpServletResponse response) {
+        memberService.deleteMember(memberId);
+        // 로그아웃 처리
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null) {
+            new SecurityContextLogoutHandler().logout(request, response, auth);
+        }
+
+
+        return "redirect:/members/login";
+    }
+
 
 
 

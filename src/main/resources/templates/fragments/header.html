@@ -3,6 +3,19 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <div th:fragment="header">
+    <script>
+        $(document).ready(function(){
+            //해더의 로그아웃 눌렸을 때 id=logoutd을 #으로 불러옴
+            $('#logout').click(function(){
+                alert("로그아웃 되었습니다.")
+            });
+            //마이페이지에 회원탈퇴를 눌렸을 때 id=deleteMember를 #으로 불러옴
+            $('#deleteMember').click(function(){
+                alert("회원 탈퇴가 완료되었습니다.\n자동 로그아웃 됩니다.")
+            });
+        });
+
+    </script>
     <nav class="navbar navbar-expand-sm bg-primary navbar-dark">
         <button class="navbar-toggler" type="button" data-toggle="collapse"
                 data-target="#navbarTogglerDemo03" aria-controls="navbarTogglerDemo03"
@@ -38,7 +51,7 @@
                     <a class="nav-link" href="/members/login">로그인</a>
                 </li>
                 <li class="nav-item" sec:authorize="isAuthenticated()">
-                    <a class="nav-link" href="/members/logout">로그아웃</a>
+                    <a id="logout" class="nav-link" href="/members/logout">로그아웃</a>
                 </li>
 
             </ul>

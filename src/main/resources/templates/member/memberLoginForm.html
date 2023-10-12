@@ -3,6 +3,17 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layouts/layout1}">
 
+<script>
+  // JavaScript 코드
+  // URL에서 alertMessage 매개 변수를 가져와서 알림 메시지를 표시
+  const urlParams = new URLSearchParams(window.location.search);
+  const alertMessage = urlParams.get("alertMessage");
+
+  if (alertMessage) {
+    alert(alertMessage);
+  }
+</script>
+
 <!-- 사용자 CSS 추가 -->
 <th:block layout:fragment="css">
   <style>
@@ -11,6 +22,7 @@
         }
     </style>
 </th:block>
+
 
 <div layout:fragment="content">
 

@@ -21,37 +21,10 @@
             if(errorMessage != null){
                 alert(errorMessage);
             }
-            function changePassword() {
-                var userId = document.getElementById("userId").value;
-                var currentPassword = document.getElementById("currentPassword").value;
-                var newPassword = document.getElementById("newPassword").value;
-                var confirmPassword = document.getElementById("confirmPassword").value;
-
-                // 서버로 보낼 데이터를 준비합니다.
-                var data = {
-                    userId: userId,
-                    currentPassword: currentPassword,
-                    newPassword: newPassword,
-                    confirmPassword: confirmPassword
-                };
-
-                // AJAX를 사용하여 비밀번호 변경 요청을 서버로 보냅니다.
-                $.ajax({
-                    type: "POST",
-                    url: "/api/change-password", // 비밀번호 변경을 처리하는 백엔드 엔드포인트 URL
-                    data: JSON.stringify(data),
-                    contentType: "application/json",
-                    success: function (response) {
-                        alert("비밀번호가 성공적으로 변경되었습니다.");
-                        // 비밀번호 변경 성공 시 필요한 작업을 수행합니다.
-                    },
-                    error: function (error) {
-                        alert("비밀번호 변경에 실패하였습니다: " + error.responseText);
-                    }
-                });
-            }
         });
     </script>
+
+
 
 </th:block>
 
@@ -68,14 +41,47 @@
         <input type="text" th:name="address" th:value="${member.address}" /><br/>
         <label for="currentPassword">현재 비밀번호 확인:</label>
         <input type="password" th:name="currentPassword" required /><br/>
-        <label for="password">비밀번호:</label>
-        <input type="password" th:name="password" /><br/>
+        <label for="newPassword">비밀번호:</label>
+        <input type="password" th:name="newPassword" /><br/>
         <label for="confirmPassword">비밀번호 확인:</label>
         <input type="password" th:name="confirmPassword" /><br/>
         <input type="submit" value="수정" />
     </form>
 
     <p id="passwordFeedback" style="color: red;"></p>
+
+
+    <script>
+        function changePassword() {
+            var userId = document.getElementById("userId").value;
+            var currentPassword = document.getElementById("currentPassword").value;
+            var newPassword = document.getElementById("newPassword").value;
+            var confirmPassword = document.getElementById("confirmPassword").value;
+
+            // 서버로 보낼 데이터를 준비합니다.
+            var data = {
+                userId: userId,
+                currentPassword: currentPassword,
+                newPassword: newPassword,
+                confirmPassword: confirmPassword
+            };
+
+            // AJAX를 사용하여 비밀번호 변경 요청을 서버로 보냅니다.
+            $.ajax({
+                type: "POST",
+                url: "/api/change-password", // 비밀번호 변경을 처리하는 백엔드 엔드포인트 URL
+                data: JSON.stringify(data),
+                contentType: "application/json",
+                success: function (response) {
+                    alert("비밀번호가 성공적으로 변경되었습니다.");
+                    // 비밀번호 변경 성공 시 필요한 작업을 수행합니다.
+                },
+                error: function (error) {
+                    alert("비밀번호 변경에 실패하였습니다: " + error.responseText);
+                }
+            });
+        }
+    </script>
 </div>
 </html>
 
