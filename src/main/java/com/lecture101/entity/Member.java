@@ -2,6 +2,7 @@ package com.lecture101.entity;
 
 import com.lecture101.constant.Role;
 import com.lecture101.dto.MemberFormDto;
+import com.lecture101.dto.MemberUpdateDto;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -43,12 +44,32 @@ public class Member extends BaseEntity {
         return member;
     }
 
-    public void
-    updateMember(MemberFormDto memberFormDto){
-        this.name = memberFormDto.getName();
-        this.email= memberFormDto.getEmail();
-        this.address = memberFormDto.getAddress();
-//        this.password = memberFormDto.getPassword();
+    public void updateMember(MemberUpdateDto memberUpdateDto, PasswordEncoder passwordEncoder) {
+
+        this.setName(memberUpdateDto.getName());
+        this.setEmail(memberUpdateDto.getEmail());
+        this.setAddress(memberUpdateDto.getAddress());
+        String password = passwordEncoder.encode(memberUpdateDto.getNewPassword());
+        this.setPassword(password);
+
+
     }
 
+
 }
+//MemberUpdateDto에 이미   @NotBlank/@NotEmpty 로
+// 유효성 검사 걸어서 null체크 필요없음
+
+//        if (memberUpdateDto.getName() != null) {
+//            this.setName(memberUpdateDto.getName());
+//        }
+//        if (memberUpdateDto.getEmail() != null) {
+//            this.setEmail(memberUpdateDto.getEmail());
+//        }
+//        if (memberUpdateDto.getAddress() != null) {
+//            this.setAddress(memberUpdateDto.getAddress());
+//        }
+//        if (memberUpdateDto.getNewPassword() != null) {
+//            String password = passwordEncoder.encode(memberUpdateDto.getNewPassword());
+//            this.setPassword(password);
+//        }

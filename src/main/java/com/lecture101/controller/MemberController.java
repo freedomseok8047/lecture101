@@ -1,7 +1,9 @@
 package com.lecture101.controller;
 
+import com.lecture101.dto.ItemFormDto;
 import com.lecture101.dto.MemberFormDto;
 import com.lecture101.dto.MemberSearchDto;
+import com.lecture101.dto.MemberUpdateDto;
 import com.lecture101.entity.Member;
 import com.lecture101.service.MemberService;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.security.Principal;
 import java.util.Optional;
 
 @RequestMapping("/members")
@@ -92,64 +95,83 @@ public class MemberController {
     @GetMapping(value = {"/mypage"})
     public String showMyPage(Model model, @AuthenticationPrincipal User user) {
         if (user != null) {
-            Member member = memberService.findByEmail(user.getUsername());
-            model.addAttribute("member", member);
+            MemberUpdateDto memberUpdateDto = memberService.findByEmail(user.getUsername());
+            model.addAttribute("memberUpdateDto", memberUpdateDto);
         }
         return "member/myPage";
     }
-    // 맴버 수정폼을 띄우기
+    // 회원 수정폼 띄우기
     @GetMapping(value = "/updateMemberForm/{memberId}")
     public String showUpdateMemberForm(@PathVariable Long memberId, Model model) {
-        Member member = memberService.findById(memberId);
-        model.addAttribute("member", member);
+        try {
+            MemberUpdateDto memberUpdateDto = memberService.getMemberDtl2(memberId);
+            model.addAttribute("memberUpdateDto", memberUpdateDto);}
+        catch(EntityNotFoundException e){
+            model.addAttribute("errorMessage", "존재하지 않는 회원입니다.");
+            model.addAttribute("memberUpdateDto", new MemberUpdateDto());
+            return "member/memberUpdate";
+        }
         return "member/memberUpdate";
     }
 
     // 회원 정보 수정 처리
     @PostMapping("/update")
-    public String updateMember(@ModelAttribute Member member,
+    public String updateMember(@ModelAttribute @Valid MemberUpdateDto memberUpdateDto, BindingResult bindingResult,
                                String currentPassword,
                                String newPassword,
                                String confirmPassword,
-                               Model model) {
+                               Model model, Principal principal) {
 
-        Member existingMember = memberService.findById(member.getId());
+//        Member existingMember = memberService.getMemberDtl2(memberUpdateDto.getId());
 
+        // 로그인한 유저를 이용해서, 디비에서, 이메일을 가져오기, -> 해당 이메일의 비밀번호 가져오기,
+        MemberUpdateDto existingMemberDto = memberService.getMemberDtl2(memberUpdateDto.getId());
+        System.out.println("currentPassword : " + currentPassword);
+        System.out.println("existingMemberDto.getCurrentPassword() : " + existingMemberDto.getCurrentPassword());
         // 현재 비밀번호 확인 로직
-        //타이핑한 currentPassword 와 db에 있는 기존 existingMember.getPassword()
+        //타이핑한 currentPassword 와 db에 있는 기존 memberUpdateDto.getCurrentPassword()
         // .matches 메서드를 이용해서 비교
-        if (!passwordEncoder.matches(currentPassword, existingMember.getPassword())) {
+        if (!passwordEncoder.matches(currentPassword, existingMemberDto.getCurrentPassword())) {
             model.addAttribute("errorMessage", "현재 비밀번호가 일치하지 않습니다.");
-            model.addAttribute("member", member); // 원래의 멤버 정보를 다시 모델에 추가
+            model.addAttribute("memberUpdateDto", memberUpdateDto); // 원래의 멤버 정보를 다시 모델에 추가
             return "member/memberUpdate";
         }
 
         // 새 비밀번호와 비밀번호 확인 일치 여부 확인 로직
-        if (newPassword != null && !newPassword.isEmpty()) {
+        if ((newPassword != null && !newPassword.isEmpty()) || bindingResult.hasErrors()) {
             if (!newPassword.equals(confirmPassword)) {
-                model.addAttribute("errorMessage", "새 비밀번호가 일치하지 않습니다.");
-                model.addAttribute("member", member); // 원래의 멤버 정보를 다시 모델에 추가
+                model.addAttribute("errorMessage", "비밀번호 확인 : 불일치");
+                model.addAttribute("memberUpdateDto", memberUpdateDto); // 원래의 멤버 정보를 다시 모델에 추가
                 return "member/memberUpdate";
             }
-            String encodedPassword = passwordEncoder.encode(newPassword);
-            member.setPassword(encodedPassword);
+            // 비밀번호 2번 인코딩하는 거 같아서 일단 주석
+            // -> 2번 인코딩한게 맞앗음
+//            String encodedPassword = passwordEncoder.encode(newPassword);
+//            memberUpdateDto.setNewPassword(encodedPassword);
+
+            // 새 비밀번호 확인이 끝나면 그대로 Entity 매퍼로 newPassword 정보만 넘기면 됨
+            memberUpdateDto.setNewPassword(newPassword);
+
         }
 
         try {
-            memberService.updateMember(member);
-        } catch (IllegalArgumentException e) {
-            model.addAttribute("errorMessage", e.getMessage());
-            model.addAttribute("member", member); // 원래의 멤버 정보를 다시 모델에 추가
+                memberService.updateMember(memberUpdateDto,passwordEncoder);
+                model.addAttribute("updateSuccessMessage", "회원정보가 수정되었습니다.");
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "회원정보 수정 중 에러가 발생했습니다.");
             return "member/memberUpdate";
         }
 
-        return "redirect:/";
+        return "member/memberUpdate";
     }
+
+
 
     // 회원탈퇴
     @GetMapping("/deleteMember/{memberId}")
     public String deleteMember(@PathVariable Long memberId, HttpServletRequest request, HttpServletResponse response) {
         memberService.deleteMember(memberId);
+
         // 로그아웃 처리
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null) {
@@ -162,8 +184,7 @@ public class MemberController {
 
 
 
-
-    // 회원 상세 페이지 폼
+    // 관리자가 봤을 때, 회원 상세 페이지 폼 (수정 불가)
     @GetMapping(value = "/admin/{memberId}")
     public String memberDtl(@PathVariable("memberId") Long memberId, Model model){
 
@@ -182,7 +203,10 @@ public class MemberController {
         return "member/memberForm";
     }
 
-    // 회원 상세 페이지에서 수정 처리부분
+}
+
+
+// 회원 상세 페이지에서 수정 처리부분
 //    @PostMapping(value = "/admin/{memberId}")
 //    public String memberUpdate(@Valid MemberFormDto memberFormDto, BindingResult bindingResult){
 //// 일반 데이터 기본 유효성 체크.
@@ -198,5 +222,3 @@ public class MemberController {
 //
 //        return "redirect:/";
 //    }
-
-}

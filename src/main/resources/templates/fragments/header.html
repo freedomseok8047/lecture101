@@ -5,14 +5,23 @@
 <div th:fragment="header">
     <script>
         $(document).ready(function(){
-            //해더의 로그아웃 눌렸을 때 id=logoutd을 #으로 불러옴
+            // 해더의 로그아웃 눌렸을 때 id=logout을 #으로 불러옴
             $('#logout').click(function(){
                 alert("로그아웃 되었습니다.")
             });
-            //마이페이지에 회원탈퇴를 눌렸을 때 id=deleteMember를 #으로 불러옴
+            // 마이페이지에 회원탈퇴를 눌렸을 때
+            // id = "deleteMember-completed"를 #으로 불러옴
             $('#deleteMember').click(function(){
                 alert("회원 탈퇴가 완료되었습니다.\n자동 로그아웃 됩니다.")
             });
+
+            // update폼에서 수정버튼을 클릭하고 수정 완료 되었을 때
+            // id = "updateMember-completed"를 #으로 불러옴
+            // 비밀번호 확인이 되지 않아도, 수정 버튼만 누르면 alter창이 뜬다
+            // 그래서 일단 주석처리
+            // $('#updateMember-completed').click(function(){
+            //     alert("회원정보가 수정 되었습니다.")
+            // });
         });
 
     </script>

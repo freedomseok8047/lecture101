@@ -15,15 +15,15 @@
 
 <div layout:fragment="content">
 <!--    th:action="@{'/members/admin/' + ${members.number}}"-->
-    <th:block th:if="${member != null}">
+    <th:block th:if="${memberUpdateDto != null}">
     <form role="form">
         <h1 class="text-decoration-none" sec:authorize="isAuthenticated()">
             <span sec:authentication="name"></span>님의 마이페이지.
         </h1>
         <button type="button" class="btn btn-primary" onClick="location.href='/cart'">클래스 신청</button>
         <button type="button" class="btn btn-primary" onClick="location.href='/orders'">수강 내역</button>
-        <a class="btn btn-primary" th:href="@{/members/updateMemberForm/{memberId}(memberId=${member.id})}">회원정보수정</a>
-        <a id="deleteMember" class="btn btn-primary deleteMember" th:href="@{/members/deleteMember/{memberId}(memberId=${member.id})}">회원탈퇴</a>
+        <a class="btn btn-primary" th:href="@{/members/updateMemberForm/{memberId}(memberId=${memberUpdateDto.id})}">회원정보수정</a>
+        <a id="deleteMember" class="btn btn-primary deleteMember" th:href="@{/members/deleteMember/{memberId}(memberId=${memberUpdateDto.id})}">회원탈퇴</a>
     </form>
     </th:block>
 

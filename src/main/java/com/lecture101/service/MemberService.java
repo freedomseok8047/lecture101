@@ -3,6 +3,7 @@ package com.lecture101.service;
 
 import com.lecture101.dto.MemberFormDto;
 import com.lecture101.dto.MemberSearchDto;
+import com.lecture101.dto.MemberUpdateDto;
 import com.lecture101.entity.Member;
 import com.lecture101.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -75,8 +76,8 @@ public class MemberService implements UserDetailsService {
         return memberFormDto;
     }
     //회원 정보 수정 처리 로직
-    public void updateMember(Member member) {
-        Member existingMember = memberRepository.findById(member.getId())
+    public void updateMember(MemberUpdateDto memberUpdateDto , PasswordEncoder passwordEncoder) {
+        Member existingMember = memberRepository.findById(memberUpdateDto.getId())
                 .orElseThrow(() -> new IllegalArgumentException("해당 회원을 찾을 수 없습니다."));
 
         // 이메일이 변경되었는지 확인하고, 변경되었다면 중복 체크를 수행합니다.
@@ -85,13 +86,16 @@ public class MemberService implements UserDetailsService {
 //            validateDuplicateMember(member);
 //        }
 
-        existingMember.setName(member.getName());
-        existingMember.setEmail(member.getEmail());
-        existingMember.setAddress(member.getAddress());
+//        existingMember.setName(memberUpdateDto.getName());
+//        existingMember.setEmail(memberUpdateDto.getEmail());
+//        existingMember.setAddress(memberUpdateDto.getAddress());
 
         // 비밀번호가 널이 아니고 비어 있지 않다면 업데이트합니다.
-        if (member.getPassword() != null && !member.getPassword().isEmpty()) {
-            existingMember.setPassword(member.getPassword());
+        if (memberUpdateDto.getCurrentPassword() != null && !memberUpdateDto.getCurrentPassword().isEmpty()) {
+            //existingMember.setPassword(memberUpdateDto.getNewPassword());
+            // 원래는 데이터를 하나하나 넣으려고 했는데 Member entity에
+            // updateMember 메서드를 정의해서 한번에 넣기
+            existingMember.updateMember(memberUpdateDto,passwordEncoder);
         }
 
         // 저장하지 않아도, JPA가 트랜잭션 종료 시점에 변경 감지 (Dirty Checking)를 하여 업데이트 쿼리를 실행합니다.
@@ -108,15 +112,25 @@ public class MemberService implements UserDetailsService {
 
 
     //이메일로 맴버 정보불러오기
-    public Member findByEmail(String email) {
-        return memberRepository.findByEmail(email);
+    public MemberUpdateDto findByEmail(String email) {
+        Member member = memberRepository.findByEmail(email);
+        MemberUpdateDto memberUpdateDto = MemberUpdateDto.of(member);
+        return memberUpdateDto;
     }
     //id로 맴버 정보 불러오기
-    public Member findById(Long memberId) {
-        return memberRepository.findById(memberId)
-                .orElse(null); // 회원이 없을 경우 null을 반환하거나 예외 처리를 수행하세요.
-    }
+//    public MemberUpdateDto findById(Long memberId) {
+//        Member member = memberRepository.findById(memberId);
+//        MemberUpdateDto memberUpdateDto = MemberUpdateDto.of(member);
+//        return memberUpdateDto;
+//    }
 
+    @Transactional(readOnly = true)
+    public MemberUpdateDto getMemberDtl2(Long memberId){
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(EntityNotFoundException::new);
+        MemberUpdateDto memberUpdateDto = MemberUpdateDto.of(member);
+        return memberUpdateDto;
+    }
 
 
 
