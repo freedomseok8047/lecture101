@@ -2,12 +2,17 @@
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:sec="http://www.w3.org/1999/xhtml"
       layout:decorate="~{layouts/layout1}">
+<!--<head>-->
+<!-- 이 부분 필수 인지 모르겠음 정상동작은 함-->
+<!--    <meta name="_csrf" th:content="${_csrf.token}"/>-->
+<!--    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>-->
+<!--</head>-->
 
 <!-- 사용자 CSS 추가 -->
 <th:block layout:fragment="css">
     <style>
         .error {
-            color: #bd2130;
+            color: #bd2130;}
     </style>
 </th:block>
 
@@ -20,27 +25,24 @@
             <button type="button" class="btn btn-primary" onClick="location.href='/cart'">클래스 신청</button>
             <button type="button" class="btn btn-primary" onClick="location.href='/orders'">수강 내역</button>
             <a class="btn btn-primary" th:href="@{/members/updateMemberForm/{memberId}(memberId=${memberUpdateDto.id})}">회원정보수정</a>
-
-            <!-- data-member-id 속성을 사용하여 memberUpdateDto.id를 전달 -->
             <a id="memberDeleteBtn" class="btn btn-primary" th:href="@{/members/deleteMember/{memberId}(memberId=${memberUpdateDto.id})}" type="button">회원탈퇴</a>
+
 
         </form>
     </th:block>
 
     <script>
+
         $(document).ready(function() {
             $("#memberDeleteBtn").click(function(event) {
                 event.preventDefault(); // 버튼의 기본 동작 중단
 
-                var shouldDelete = confirm("정말 수정 할까요?");
+                var shouldDelete = confirm("정말 회원탈퇴 하시겠습니까?");
                 if (shouldDelete) {
-                    // `memberId`를 경로 변수로 사용
-                    var memberId = $("#memberDeleteBtn").data("member-id");
-                    location.href = '/members/deleteMember/' + memberId;
+                    location.href = $(this).attr('href'); // 버튼의 href 속성을 사용하여 이동
                 }
             });
         });
-
 
     </script>
 </div>

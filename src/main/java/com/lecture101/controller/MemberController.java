@@ -132,7 +132,7 @@ public class MemberController {
         //타이핑한 currentPassword 와 db에 있는 기존 memberUpdateDto.getCurrentPassword()
         // .matches 메서드를 이용해서 비교
         if (!passwordEncoder.matches(currentPassword, existingMemberDto.getCurrentPassword())) {
-            model.addAttribute("errorMessage", "현재 비밀번호가 일치하지 않습니다.");
+            model.addAttribute("errorMessage1", "현재 비밀번호가 일치하지 않습니다.");
             model.addAttribute("memberUpdateDto", memberUpdateDto); // 원래의 멤버 정보를 다시 모델에 추가
             return "member/memberUpdate";
         }
@@ -140,7 +140,7 @@ public class MemberController {
         // 새 비밀번호와 비밀번호 확인 일치 여부 확인 로직
         if ((newPassword != null && !newPassword.isEmpty()) || bindingResult.hasErrors()) {
             if (!newPassword.equals(confirmPassword)) {
-                model.addAttribute("errorMessage", "비밀번호 확인 : 불일치");
+                model.addAttribute("errorMessage2", "비밀번호 확인 : 불일치");
                 model.addAttribute("memberUpdateDto", memberUpdateDto); // 원래의 멤버 정보를 다시 모델에 추가
                 return "member/memberUpdate";
             }
